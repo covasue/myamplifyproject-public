@@ -1,13 +1,19 @@
 <template>
   <div id="app">
-    <h1>Todo App</h1>
-    <input type="text" v-model="name" placeholder="Todo name" />
-    <input type="text" v-model="description" placeholder="Todo description" />
-    <button v-on:click="createTodo">Create Todo</button>
-    <div v-for="item in todos" :key="item.id">
-      <h3>{{ item.name }}</h3>
-      <p>{{ item.description }}</p>
-    </div>
+    <authenticator>
+      <template v-slot="{ user, signOut }">
+        <h1>Hello {{ user.username }}!</h1>
+        <button @click="signOut">Sign Out</button>
+        <h1>Todo App</h1>
+        <input type="text" v-model="name" placeholder="Todo name" />
+        <input type="text" v-model="description" placeholder="Todo description" />
+        <button v-on:click="createTodo">Create Todo</button>
+        <div v-for="item in todos" :key="item.id">
+          <h3>{{ item.name }}</h3>
+          <p>{{ item.description }}</p>
+        </div>
+      </template>
+    </authenticator>
   </div>
 </template>
 
@@ -15,14 +21,13 @@
 import { API } from 'aws-amplify';
 import { createTodo } from './graphql/mutations';
 import { listTodos } from './graphql/queries';
-// other imports
 import { onCreateTodo } from './graphql/subscriptions';
-
+import { Authenticator } from '@aws-amplify/ui-vue';
+import '@aws-amplify/ui-vue/styles.css';
 export default {
   name: 'app',
   async created() {
     this.getTodos();
-    // other functions and properties
     this.subscribe();
   },
   data() {
@@ -31,6 +36,9 @@ export default {
       description: '',
       todos: []
     }
+  },
+  components: {
+    Authenticator
   },
   methods: {
     async createTodo() {
@@ -50,7 +58,6 @@ export default {
       });
       this.todos = todos.data.listTodos.items;
     },
-    // other methods
     subscribe() {
       API.graphql({ query: onCreateTodo })
         .subscribe({
